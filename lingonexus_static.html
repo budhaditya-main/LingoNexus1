@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LingoNexus - Cultural Intelligence Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --paper:     #f5f0e8;
+  --paper2:    #ede8de;
+  --paper3:    #e4ddd0;
+  --white:     #faf7f2;
+  --ink:       #111111;
+  --ink2:      #2a2a2a;
+  --ink3:      #444444;
+  --muted:     #888880;
+  --border:    #d4cfc5;
+  --border2:   #c2bdb0;
+  --red:       #c0392b;
+  --red-bg:    rgba(192,57,43,0.07);
+  --red-line:  rgba(192,57,43,0.2);
+  --orange:    #c0622b;
+  --ora-bg:    rgba(192,98,43,0.07);
+  --ora-line:  rgba(192,98,43,0.2);
+  --green:     #2a6b4a;
+  --grn-bg:    rgba(42,107,74,0.07);
+  --grn-line:  rgba(42,107,74,0.2);
+  --accent:    #1a1a1a;
+  --ghost:     rgba(17,17,17,0.04);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle paper texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 1;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-brand {
+  padding: 36px 28px 28px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.wm-lingo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: -1px;
+  color: var(--ink);
+}
+
+.wm-nexus {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-left: 4px;
+  margin-bottom: 2px;
+}
+
+.brand-tag {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 5px 10px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--grn-bg);
+}
+
+.status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 2.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.sidebar-section {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-label {
+  font-size: 8px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.field { margin-bottom: 15px; }
+
+.field-label {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.field-input,
+.field-select,
+.field-textarea {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--border2);
+  color: var(--ink);
+  padding: 10px 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-appearance: none;
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(17,17,17,0.06);
+  background: var(--white);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 82px;
+  line-height: 1.65;
+}
+
+.field-select option { background: var(--white); }
+.field-select optgroup { color: var(--muted); }
+
+.run-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.run-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transition: left 0.5s;
+}
+
+.run-btn:hover:not(:disabled)::after { left: 100%; }
+
+.run-btn:hover:not(:disabled) {
+  background: var(--ink2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(17,17,17,0.2);
+}
+
+.run-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.ring {
+  width: 13px; height: 13px;
+  border: 2px solid rgba(245,240,232,0.3);
+  border-top-color: var(--paper);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  display: none;
+}
+
+.sidebar-foot {
+  padding: 18px 28px;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+
+.foot-text {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.9;
+  font-style: italic;
+}
+
+/* MAIN */
+.main {
+  padding: 52px 64px 100px;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+/* EMPTY STATE */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 78vh;
+  text-align: center;
+  animation: fadeIn 0.5s ease both;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.empty-vol {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.empty-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: 58px;
+  font-weight: 900;
+  line-height: 1.0;
+  color: var(--ink);
+  letter-spacing: -2px;
+  margin-bottom: 6px;
+}
+
+.empty-headline em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.empty-rule {
+  width: 100%;
+  max-width: 460px;
+  height: 2px;
+  background: var(--ink);
+  margin: 20px auto;
+}
+
+.empty-rule-thin {
+  width: 100%;
+  max-width: 460px;
+  height: 1px;
+  background: var(--border2);
+  margin: 8px auto 20px;
+}
+
+.empty-desc {
+  font-size: 13px;
+  color: var(--ink3);
+  max-width: 420px;
+  line-height: 1.9;
+  font-weight: 400;
+}
+
+.empty-kicker {
+  margin-top: 28px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* SKELETON */
+.skeleton { display: none; }
+
+.skel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.skel-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: pulseDot 1.4s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.skel-msg {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink3);
+}
+
+.skel-line {
+  height: 14px;
+  border-radius: 2px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, var(--paper2) 25%, var(--paper3) 50%, var(--paper2) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer { to { background-position: -600px 0; } }
+
+/* RESULTS */
+.results { display: none; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fu  { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fu1 { animation-delay: 0.03s; }
+.fu2 { animation-delay: 0.09s; }
+.fu3 { animation-delay: 0.15s; }
+.fu4 { animation-delay: 0.21s; }
+.fu5 { animation-delay: 0.27s; }
+.fu6 { animation-delay: 0.33s; }
+
+/* Result header - newspaper style */
+.result-dateline {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.result-dateline::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+}
+
+.result-rule-top {
+  height: 3px;
+  background: var(--ink);
+  margin-bottom: 16px;
+  border-radius: 1px;
+}
+
+.result-slogan {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -1.5px;
+}
+
+.result-rule-mid {
+  height: 1px;
+  background: var(--border2);
+  margin: 16px 0;
+}
+
+.result-route {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  color: var(--ink3);
+  font-weight: 500;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.route-from, .route-to {
+  padding: 3px 10px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  font-size: 11px;
+  background: var(--white);
+}
+
+.route-arrow { color: var(--ink); font-size: 14px; }
+
+.risk-badge {
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.badge-high   { background: var(--red-bg);  border: 1px solid var(--red-line);  color: var(--red); }
+.badge-medium { background: var(--ora-bg);  border: 1px solid var(--ora-line);  color: var(--orange); }
+.badge-low    { background: var(--grn-bg);  border: 1px solid var(--grn-line);  color: var(--green); }
+
+/* Misstep - newspaper correction box */
+.misstep {
+  border: 2px solid var(--red);
+  border-radius: 3px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  background: var(--red-bg);
+  position: relative;
+}
+
+.misstep-label {
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.misstep-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.misstep-sub {
+  font-size: 11px;
+  color: var(--red);
+  opacity: 0.7;
+}
+
+/* Score strip */
+.score-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-bottom: 28px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--border2);
+}
+
+.score-card {
+  background: var(--white);
+  padding: 20px 22px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.score-card:hover { background: var(--paper2); }
+
+.score-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.s-high::before   { background: var(--red); }
+.s-medium::before { background: var(--orange); }
+.s-low::before    { background: var(--green); }
+
+.score-label {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.score-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.s-high   .score-number { color: var(--red); }
+.s-medium .score-number { color: var(--orange); }
+.s-low    .score-number { color: var(--green); }
+
+.score-risk {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.s-high   .score-risk { color: var(--red); }
+.s-medium .score-risk { color: var(--orange); }
+.s-low    .score-risk { color: var(--green); }
+
+/* Audit blocks */
+.audit-block {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.audit-block:hover {
+  border-color: var(--border2);
+  box-shadow: 0 2px 12px rgba(17,17,17,0.06);
+}
+
+.block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.block-header:hover { background: var(--ghost); }
+
+.block-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.block-icon {
+  width: 34px; height: 34px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--paper);
+}
+
+.block-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 1px;
+  color: var(--ink);
+}
+
+.block-sub {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.block-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.block-chevron {
+  color: var(--muted);
+  font-size: 11px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.block-chevron.open { transform: rotate(180deg); }
+
+.block-body {
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  display: none;
+  background: var(--paper);
+}
+
+.block-body.open {
+  display: block;
+  animation: expandIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes expandIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.finding {
+  display: flex;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.4s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.finding:last-of-type {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.finding-bar {
+  width: 2px;
+  flex-shrink: 0;
+  margin-right: 18px;
+  border-radius: 2px;
+  align-self: stretch;
+}
+
+.bar-high   { background: linear-gradient(to bottom, var(--red), rgba(192,57,43,0.1)); }
+.bar-medium { background: linear-gradient(to bottom, var(--orange), rgba(192,98,43,0.1)); }
+.bar-low    { background: linear-gradient(to bottom, var(--green), rgba(42,107,74,0.1)); }
+
+.finding-issue {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 7px;
+  color: var(--ink);
+}
+
+.finding-detail {
+  font-size: 12.5px;
+  color: var(--ink3);
+  line-height: 1.9;
+  margin-bottom: 14px;
+  font-weight: 400;
+}
+
+.sug-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px;
+}
+
+.sug-title {
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.sug-item {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.75;
+  margin-bottom: 8px;
+  color: var(--ink3);
+  font-weight: 400;
+}
+
+.sug-item:last-child { margin-bottom: 0; }
+
+.sug-n {
+  color: var(--ink);
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.adapt-box {
+  margin-top: 24px;
+  background: var(--white);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 22px;
+}
+
+.adapt-label {
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adapt-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.adapt-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adapt-opt {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 16px 18px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.adapt-opt:hover {
+  border-color: var(--ink);
+  background: var(--paper2);
+}
+
+.adapt-opt-label {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+  font-weight: 600;
+}
+
+.adapt-opt-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 7px;
+  font-weight: 500;
+}
+
+.adapt-opt-note {
+  font-size: 11.5px;
+  color: var(--ink3);
+  line-height: 1.75;
+  font-weight: 400;
+}
+
+.disclaimer-block {
+  margin-top: 32px;
+  padding: 22px 26px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--ink);
+  border-radius: 0 0 3px 3px;
+}
+
+.disclaimer-block p {
+  font-size: 11.5px;
+  color: var(--ink3);
+  line-height: 1.9;
+  font-weight: 400;
+}
+
+.disclaimer-block strong { color: var(--ink); font-weight: 700; }
+
+.made-by {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-style: italic;
+}
+
+.made-by span {
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 600;
+}
+
+@media (max-width: 840px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .main { padding: 28px 22px 70px; }
+  .score-strip { grid-template-columns: 1fr; gap: 0; }
+  .result-slogan { font-size: 36px; }
+  .empty-headline { font-size: 38px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="wordmark">
+        <span class="wm-lingo">Lingo</span><span class="wm-nexus">nexus</span>
+      </div>
+      <div class="brand-tag">Cultural Intelligence Engine</div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        Engine Active
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Configure Audit</div>
+      <div class="field">
+        <label class="field-label">Brand Name</label>
+        <input class="field-input" id="f-brand" placeholder="e.g. Nike, Coca-Cola, Ford...">
+        <div style="margin-top:6px;font-size:9px;color:#888880;letter-spacing:0.05em;line-height:1.6;">Try: Coca-Cola · Cadbury · Nike · Pepsi · KFC · Ford · Amazon · Maggi · McDonald's · Starbucks · Airbnb · Zomato · Pillsbury</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Slogan / Campaign Text</label>
+        <textarea class="field-textarea" id="f-slogan" placeholder="Paste the original campaign text here..."></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Source Market</label>
+        <select class="field-select" id="f-source">
+          <option value="United States">United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="France">France</option>
+          <option value="Germany">Germany</option>
+          <option value="Japan">Japan</option>
+          <option value="South Korea">South Korea</option>
+          <option value="Australia">Australia</option>
+          <option value="Italy">Italy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Target Market</label>
+        <select class="field-select" id="f-target">
+          <optgroup label="South Asia">
+            <option value="India">India</option>
+          </optgroup>
+          <optgroup label="East Asia">
+            <option value="China">China</option>
+            <option value="Japan">Japan</option>
+            <option value="South Korea">South Korea</option>
+          </optgroup>
+          <optgroup label="Middle East">
+            <option value="Saudi Arabia">Saudi Arabia</option>
+            <option value="UAE">UAE</option>
+            <option value="Egypt">Egypt</option>
+            <option value="Turkey">Turkey</option>
+          </optgroup>
+          <optgroup label="Africa">
+            <option value="Nigeria">Nigeria</option>
+            <option value="South Africa">South Africa</option>
+          </optgroup>
+          <optgroup label="Americas">
+            <option value="Brazil">Brazil</option>
+            <option value="Mexico">Mexico</option>
+          </optgroup>
+          <optgroup label="Europe and Other">
+            <option value="Russia">Russia</option>
+            <option value="Indonesia">Indonesia</option>
+            <option value="Poland">Poland</option>
+          </optgroup>
+        </select>
+      </div>
+      <button class="run-btn" id="run-btn" onclick="runAudit()">
+        <span id="btn-label">Run Audit</span>
+        <div class="ring" id="ring"></div>
+      </button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="foot-text">LingoNexus audits and flags.<br>It does not decide. Humans do.</div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+
+    <div class="empty" id="empty-state">
+      <div class="empty-vol">LingoNexus - Vol. 01</div>
+      <div class="empty-headline">Does your<br>brand <em>travel?</em></div>
+      <div class="empty-rule"></div>
+      <div class="empty-rule-thin"></div>
+      <div class="empty-desc">Paste any global campaign slogan, select your source and target market, and LingoNexus audits it across linguistic, emotional, cultural, and political dimensions.</div>
+      <div class="empty-kicker">Configure audit in the sidebar to begin</div>
+    </div>
+
+    <div class="skeleton" id="skeleton">
+      <div class="skel-header">
+        <div class="skel-dot"></div>
+        <div class="skel-msg">Auditing cultural context...</div>
+      </div>
+      <div style="margin-bottom:32px;">
+        <div class="skel-line" style="width:130px;height:9px;margin-bottom:14px;"></div>
+        <div class="skel-line" style="width:70%;height:44px;margin-bottom:12px;border-radius:3px;"></div>
+        <div class="skel-line" style="width:240px;height:9px;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-bottom:28px;background:var(--border2);border-radius:3px;overflow:hidden;">
+        <div class="skel-line" style="height:96px;border-radius:0;margin:0;"></div>
+        <div class="skel-line" style="height:96px;border-radius:0;margin:0;"></div>
+        <div class="skel-line" style="height:96px;border-radius:0;margin:0;"></div>
+      </div>
+      <div class="skel-line" style="height:62px;border-radius:3px;margin-bottom:12px;"></div>
+      <div class="skel-line" style="height:220px;border-radius:3px;margin-bottom:12px;"></div>
+      <div class="skel-line" style="height:220px;border-radius:3px;"></div>
+    </div>
+
+    <div class="results" id="results"></div>
+  </main>
+</div>
+
+<script>
+// ── HARDCODED DATASET ──────────────────────────────────────────────────────
+const DATASET = {
+  "coca-cola": {
+    brand: "Coca-Cola", slogan: "Taste the Feeling", source: "United States", target: "India",
+    literal_misstep: "\"Taste the Feeling\" has no direct emotional pull in Hindi. A literal translation \"Ehsaas ko chakho\" sounds awkward and clinical — \"chakhna\" (to taste) is used for food samples, not emotional experiences.",
+    linguistic: {
+      risk: "Low", score: 82,
+      findings: [
+        { level: "low", issue: "Category Name Hijack", detail: "\"Thanda\" (cold) is the generic Indian term for any cold drink. Coca-Cola's campaign \"Thanda Matlab Coca-Cola\" (Cold means Coca-Cola) brilliantly hijacked the category name, making the brand synonymous with the entire cold drink category.", suggestions: ["Use category-level words as brand anchors", "Commission native speaker audits before slogan finalisation", "Test slogan recall in tier-2 cities, not just metros"] },
+        { level: "low", issue: "Hospitality Connotation", detail: "Offering a \"Thanda\" to a guest is a deeply ingrained Indian hospitality ritual. By owning the word, Coke positioned itself as the default hospitality drink, embedding itself in social customs rather than just taste preferences.", suggestions: ["Map slogans to local social rituals", "Avoid functional descriptors — use social ones", "Partner with cultural anthropologists for market entry"] }
+      ],
+      adaptations: [
+        { label: "Thanda Matlab Coca-Cola", text: "ठंडा मतलब Coca-Cola", note: "Owns the entire cold drink category in Indian consumer's mind" },
+        { label: "Har Pal ka Saathi", text: "हर पल का साथी", note: "Every moment's companion — taps into Indian collectivist values" }
+      ]
+    },
+    cultural: {
+      risk: "Low", score: 88,
+      findings: [
+        { level: "low", issue: "Guest Culture Integration", detail: "Indian atithi devo bhava (guest is god) culture means a cold drink offered to a visitor carries social weight far beyond refreshment. Coke's campaigns showed this offering moment, making the brand culturally essential.", suggestions: ["Feature hosting moments in campaigns", "Show multi-generational family scenes", "Use regional festive contexts (Holi, Diwali) for seasonal campaigns"] },
+        { level: "low", issue: "Cricket Sponsorship Alignment", detail: "Associating with cricket — India's de facto national religion — gave Coca-Cola cultural legitimacy that no amount of advertising could buy. The emotional transfer from cricket heroes to the brand is near-permanent.", suggestions: ["Align with hyper-local passion points beyond cricket in tier-3 markets", "Use regional sport heroes for state-level campaigns", "Avoid Western lifestyle imagery in rural campaigns"] }
+      ],
+      adaptations: [
+        { label: "The Hospitality Campaign", text: "Show a host offering Coca-Cola as the first act of welcome", note: "Mirrors the chai/cold drink hospitality ritual in Indian homes" },
+        { label: "Festival Edition", text: "Seasonal packaging with regional festival motifs", note: "Deepavali in South, Durga Puja in East, Navratri in West — localise by region" }
+      ]
+    }
+  },
+  "cadbury": {
+    brand: "Cadbury", slogan: "Free the Joy", source: "United Kingdom", target: "India",
+    literal_misstep: "\"Free the Joy\" translates to \"Khushi ko azaad karo\" — which in Hindi carries a political undertone of liberation, not celebration. It sounds like joy is imprisoned, a strange and slightly dark idea for a chocolate brand.",
+    linguistic: {
+      risk: "Medium", score: 74,
+      findings: [
+        { level: "medium", issue: "Liberation Framing Misfire", detail: "\"Free\" in English implies release and fun. \"Azaad\" in Hindi carries the weight of India's independence movement — Azaadi (freedom from colonial rule). Using it for chocolate trivialises a deeply charged word.", suggestions: ["Replace liberation metaphors with celebration metaphors", "Use \"Manao\" (celebrate) instead of \"Azaad Karo\"", "Commission a Hindi copywriter before translating — never translate, transcreate"] },
+        { level: "low", issue: "Shagun Sweetness Opportunity", detail: "\"Kuch Meetha Ho Jaaye\" (Let's have something sweet) perfectly captured the Indian tradition of Shagun ki Mithai — eating sweets before auspicious events. This is a cultural insight no translation could find.", suggestions: ["Research occasion-based consumption rituals", "Map product to life events (exam results, job offers, weddings)", "Use the word 'Meetha' which carries auspiciousness, not just taste"] }
+      ],
+      adaptations: [
+        { label: "Kuch Meetha Ho Jaaye", text: "कुछ मीठा हो जाए", note: "Let's have something sweet — connects to the auspicious ritual of eating sweets before good news" },
+        { label: "Khushi Baanto", text: "खुशी बाँटो", note: "Share the joy — taps into Indian collectivist value of sharing celebrations" }
+      ]
+    },
+    cultural: {
+      risk: "Low", score: 85,
+      findings: [
+        { level: "low", issue: "Mithai Replacement Strategy", detail: "Cadbury successfully positioned Dairy Milk as a modern replacement for traditional Indian sweets (mithai) during celebrations. This required deep cultural insight — mithai is tied to religion, caste rituals, and gifting hierarchies.", suggestions: ["Position as complement to mithai, not replacement, in conservative markets", "Use festive gifting positioning (Diwali hampers) to enter traditional gift occasions", "Show product alongside, not instead of, traditional sweets in early campaigns"] },
+        { level: "low", issue: "Cricket Celebration Moment", detail: "The iconic 1994 ad showing a girl dancing on a cricket field after a boundary became India's most recalled chocolate ad. It captured post-victory sweetness — a universal Indian emotion tied to cricket.", suggestions: ["Identify the one cultural 'sweet moment' specific to each market", "Use real, unscripted celebration footage", "Avoid Western birthday cake associations — use Indian celebration contexts"] }
+      ],
+      adaptations: [
+        { label: "Shubh Aarambh", text: "शुभ आरंभ", note: "Auspicious beginning — ties Cadbury to the Indian ritual of eating something sweet before starting anything new" },
+        { label: "Rishton ki Meethas", text: "रिश्तों की मिठास", note: "Sweetness of relationships — positions Cadbury as the emotional currency of Indian relationships" }
+      ]
+    }
+  },
+  "ford": {
+    brand: "Ford", slogan: "Every Car has a High-Quality Body", source: "United States", target: "India",
+    literal_misstep: "\"Har Gaadi ki Body badhiya hai\" — In Indian Hindi, \"Body\" (शव / body) is commonly used to refer to a human corpse, especially in news reports and police contexts. The sentence literally sounds like: \"Every car has a high-quality dead body in it.\"",
+    linguistic: {
+      risk: "High", score: 18,
+      findings: [
+        { level: "high", issue: "Corpse Connotation", detail: "In Indian Hindi media, \"Body milna\" (body found) or \"Body baraamad\" (body recovered) are standard crime/death news phrases. The word \"Body\" in the context of quality immediately triggers this death association for Hindi speakers.", suggestions: ["Replace 'Body' with 'Daancha' (chassis/frame) or 'Nirman' (construction)", "Never use direct English loanwords without testing local connotation", "Run the translated slogan through native speakers across 3+ Indian states before use"] },
+        { level: "high", issue: "Direct Translation Disaster", detail: "This is a textbook case of translating words instead of meanings. The English word 'body' in automotive context means chassis/shell. In Hindi, 'body' retains its most common cultural usage — a human corpse. The quality modifier makes it even more morbid.", suggestions: ["Use 'Sarookhna' (structure) or 'Kaayas' for automotive body", "Always back-translate to English to catch disasters", "Hire automotive-specific Hindi copywriters, not general translators"] },
+        { level: "medium", issue: "Trust Erosion Risk", detail: "In Indian culture, death omens are taken seriously — associating a product with death imagery, even accidentally, can create deep-seated superstitious avoidance of the brand among older demographics and in tier-2/3 markets.", suggestions: ["Issue correction immediately and don't draw attention to the error", "Replace with aspirational language around 'Shakti' (power) or 'Mazbooti' (strength)", "Run focus groups in non-metro markets before any Hindi campaign launch"] }
+      ],
+      adaptations: [
+        { label: "Mazbooti jo Dikhti Hai", text: "मज़बूती जो दिखती है", note: "Strength you can see — replaces 'body' with 'mazbooti' (robustness), a universally positive automotive word" },
+        { label: "Desh ki Taqat", text: "देश की ताक़त", note: "The nation's strength — reframes the car as a symbol of Indian pride and power" }
+      ]
+    },
+    cultural: {
+      risk: "High", score: 22,
+      findings: [
+        { level: "high", issue: "Death Taboo Violation", detail: "Indian culture has strong taboos around death omens in commerce. Associating a product with death — even accidentally — can cause consumers to avoid the brand for superstitious reasons. This is especially strong in North Indian and rural markets.", suggestions: ["Audit all translated materials for death/illness/misfortune associations", "Include a cultural taboo checklist in all localisation workflows", "Test with older demographic (45+) who have stronger taboo associations"] },
+        { level: "medium", issue: "Missing Aspiration Language", detail: "Indian automotive buyers are purchasing status and aspiration as much as transportation. Words like 'Shakti', 'Shaan', 'Gaurav' (pride) resonate far more than functional quality descriptors.", suggestions: ["Lead with aspiration, follow with function", "Use social proof language ('India's favourite') over quality claims", "Show family pride moments, not engineering specifications"] }
+      ],
+      adaptations: [
+        { label: "Shaan se Chalo", text: "शान से चलो", note: "Drive with pride — positions Ford as a status symbol, which drives Indian automotive purchase decisions" },
+        { label: "Apna Safar, Apni Taqat", text: "अपना सफर, अपनी ताक़त", note: "Your journey, your power — personal ownership and empowerment framing" }
+      ]
+    }
+  },
+  "nike": {
+    brand: "Nike", slogan: "Just Do It", source: "United States", target: "India",
+    literal_misstep: "\"Bas Kar Do\" — the most natural Hindi translation — literally means \"Just stop it\" or \"That's enough, quit.\" It's used when scolding someone to stop doing something. The exact opposite of the intended motivational message.",
+    linguistic: {
+      risk: "High", score: 25,
+      findings: [
+        { level: "high", issue: "Bas Kar Do = Stop It", detail: "\"Bas\" in Hindi means \"enough\" or \"stop.\" \"Bas Kar Do\" is what a parent says to a misbehaving child — \"Stop it now.\" A direct translation of Nike's most iconic slogan becomes a command to quit, not to act.", suggestions: ["Never translate 'Just Do It' literally into Hindi", "Use 'Rukna Mat' (Don't stop) which captures the spirit", "Or use 'Kar Dikha' (Show them you can do it) for a more defiant Indian tone"] },
+        { level: "medium", issue: "Imperative Tone Mismatch", detail: "English imperatives read as empowering. Hindi imperatives can read as commanding or disrespectful depending on verb form. \"Karo\" (do it) in the wrong register sounds like an order from a superior, not self-motivation.", suggestions: ["Use softer motivational constructions: 'Tu kar sakta hai' (You can do it)", "Test imperative vs. affirmative tone with target age groups", "Use regional language variants — Tamil, Bengali markets respond differently to imperatives"] }
+      ],
+      adaptations: [
+        { label: "Rukna Mat", text: "रुकना मत", note: "Don't stop — captures the Nike spirit of perseverance without the 'stop it' double meaning" },
+        { label: "Da Da Ding (Campaign)", text: "दा दा डिंग — Female Empowerment", note: "Nike's actual India campaign — celebrated Indian women in sport, broke the 'delicate woman' stereotype. A cultural insight, not a translation." }
+      ]
+    },
+    cultural: {
+      risk: "Medium", score: 65,
+      findings: [
+        { level: "medium", issue: "Female Athlete Stereotype", detail: "Indian society historically positioned women as delicate and non-athletic. Nike's 'Da Da Ding' campaign directly challenged this by showing women in aggressive, competitive sport — making Nike a symbol of female empowerment and modernity.", suggestions: ["Position sportswear as identity, not just equipment", "Feature real Indian women athletes (PV Sindhu, Mirabai Chanu) not models", "Avoid Western athletic aesthetics — show indigenous sports and bodies"] },
+        { level: "low", issue: "Cricket vs. Running Culture", detail: "Nike's global DNA is running and basketball — both minority sports in India. Their pivot to cricket (and female sport) was a critical cultural adaptation. Running culture in India is urban and growing, but cricket is universal.", suggestions: ["Lead with cricket for mass market, use running/gym for urban premium segment", "Partner with IPL teams for mass cultural credibility", "Use regional sport stars — kabaddi, wrestling — for tier-2 market penetration"] }
+      ],
+      adaptations: [
+        { label: "Khel Ja", text: "खेल जा", note: "Just play on — informal, youthful, removes the 'work' connotation of 'Do It' and replaces with play" },
+        { label: "Haar Mat", text: "हार मत", note: "Don't lose — defiant, emotionally resonant, connects to the Indian underdog narrative" }
+      ]
+    }
+  },
+  "pepsi": {
+    brand: "Pepsi", slogan: "Come Alive with the Pepsi Generation", source: "United States", target: "India",
+    literal_misstep: "\"Pepsi ke saath zinda ho jaao\" — In Hindi, \"Zinda ho jaao\" (come alive) carries a deeply unsettling connotation of resurrection from the dead. In a country with strong beliefs in reincarnation, spirits, and the afterlife, promising to 'come alive' sounds like a supernatural or religious claim — not a soft drink benefit.",
+    linguistic: {
+      risk: "High", score: 20,
+      findings: [
+        { level: "high", issue: "Resurrection Connotation", detail: "\"Zinda ho jaana\" in Hindi means to come back to life after death. This is the language of ghost stories, reincarnation theology, and horror. Used in a beverage ad, it creates an association between Pepsi and the supernatural — deeply alarming in a market with strong spirit/afterlife beliefs.", suggestions: ["Replace 'come alive' with energy-based language: 'Josh aa jaaye' (let energy come)", "Use 'Taaza ho jaao' (feel fresh) as a safe, positive alternative", "Test any 'life/alive' metaphors for death-adjacent connotations before using"] },
+        { level: "high", issue: "Religious Claim Risk", detail: "In a country where reincarnation is a fundamental religious belief across Hinduism, Buddhism, and Jainism, claiming a drink can make you 'come alive' could be read as a blasphemous or absurd religious claim by conservative communities.", suggestions: ["Avoid any life/death/rebirth metaphors in Indian campaigns", "Use festivity and energy language instead of vitality language", "Consult a religious sensitivity expert for all Indian campaign copy"] }
+      ],
+      adaptations: [
+        { label: "Josh Utha Pepsi Ke Saath", text: "जोश उठा Pepsi के साथ", note: "Feel the energy with Pepsi — 'Josh' (passion/energy) is a culturally beloved word with no death connotation" },
+        { label: "Yeh Dil Maange More", text: "यह दिल माँगे मोर", note: "The heart wants more — Pepsi's actual iconic India slogan. Pure desire, no life/death metaphor." }
+      ]
+    },
+    cultural: {
+      risk: "High", score: 30,
+      findings: [
+        { level: "high", issue: "Afterlife Belief Sensitivity", detail: "India has the world's highest concentration of reincarnation believers. The concept of 'coming alive' is tied to moksha, karma, and the soul's journey — not a beverage. Using this framework trivialises deeply held spiritual beliefs.", suggestions: ["Map all campaign metaphors against the major religious belief systems in target markets", "Avoid Western vitality metaphors (alive, electric, fire) which have different connotations in India", "Use joy and desire metaphors instead — they are culturally safe and universally resonant"] },
+        { level: "medium", issue: "Generation Gap Framing", detail: "'The Pepsi Generation' worked in the US as a youth rebellion against Coke/tradition. In India, youth rebellion against elders is culturally uncomfortable — filial piety is strong. The generational framing needs to be reframed as aspiration, not rebellion.", suggestions: ["Frame youth positioning as achievement, not rebellion", "Show parents being proud, not excluded", "Use 'Nayi Soch' (new thinking) rather than generational conflict framing"] }
+      ],
+      adaptations: [
+        { label: "Yeh Dil Maange More", text: "यह दिल माँगे मोर", note: "This heart wants more — desire and aspiration, culturally safe and iconic" },
+        { label: "Swag Se Piyo", text: "स्वैग से पियो", note: "Drink with swagger — modern, youth-coded, no death connotation" }
+      ]
+    }
+  },
+  "kfc": {
+    brand: "KFC", slogan: "Finger-Lickin' Good", source: "United States", target: "India",
+    literal_misstep: "\"Ungliyaan Chaat-te Reh Jaoge\" — while the Hindi phrase exists, \"chaatna\" (to lick) applied to fingers in certain North Indian dialects carries connotations of desperation, poor hygiene, or even a veiled threat. The image of licking fingers is considered unhygienic in formal settings.",
+    linguistic: {
+      risk: "High", score: 35,
+      findings: [
+        { level: "high", issue: "Hygiene Taboo", detail: "Licking fingers in Indian culture is associated with informal, lower-class eating habits in many urban contexts. In a restaurant setting, it signals poor hygiene — the opposite of the intended 'so delicious you can't help it' message. KFC eventually moved to \"So Good\" for this reason.", suggestions: ["Replace licking metaphor with taste-intensity metaphors", "Use 'Zabardast Zaika' (extraordinary taste) or 'Lajawab' (beyond comparison)", "Never use body-contact-with-food metaphors without extensive cultural testing"] },
+        { level: "medium", issue: "Dialect Variation Risk", detail: "In some North Indian and Eastern dialects, phrases around licking can carry threatening connotations ('I'll show you') or be used in insults. The exact phrasing matters enormously and varies by state.", suggestions: ["Test Hindi copy in at minimum Delhi, Mumbai, Kolkata, and Chennai", "Commission state-by-state slogan variants for large campaigns", "Use pan-India safe words like 'Mazedaar' (delicious) as a baseline"] }
+      ],
+      adaptations: [
+        { label: "So Good / Itna Acha", text: "इतना अच्छा", note: "KFC's actual pivot — clean, safe, and still conveys quality without hygiene risk" },
+        { label: "Ek Baar Khao, Bhool Na Pao", text: "एक बार खाओ, भूल न पाओ", note: "Once you eat it, you can't forget it — taste memory metaphor, culturally universal" }
+      ]
+    },
+    cultural: {
+      risk: "Medium", score: 55,
+      findings: [
+        { level: "medium", issue: "Vegetarian Market Tension", detail: "India has the world's largest vegetarian population (~40%). KFC's core product (chicken) faces structural resistance in many markets, especially in Gujarat and Rajasthan. The licking metaphor applied to chicken amplifies the aversion for vegetarian consumers.", suggestions: ["Lead with vegetarian menu items in high-vegetarian markets", "Avoid meat-forward imagery in Gujarat, Rajasthan campaigns", "Use neutral taste-happiness imagery that works across dietary preferences"] },
+        { level: "low", issue: "Fast Food Repositioning", detail: "KFC successfully repositioned from 'American fast food' to 'celebration meal' in India, particularly for birthday parties and family outings. This cultural shift required moving away from the licking/indulgence metaphor to a family-sharing one.", suggestions: ["Feature family sharing moments prominently", "Position as 'special occasion' food, not everyday fast food", "Use birthday and festival associations to drive traffic"] }
+      ],
+      adaptations: [
+        { label: "Khushiyon Ka Khana", text: "खुशियों का खाना", note: "The food of happiness — positions KFC as celebration food, culturally appropriate for family occasions" },
+        { label: "Yaar Dosto Ka Zaika", text: "यार दोस्तों का ज़ायका", note: "The taste of friends — social eating culture is strong in India; friendship framing is universally safe" }
+      ]
+    }
+  },
+  "amazon": {
+    brand: "Amazon", slogan: "Earth's Most Customer-Centric Company", source: "United States", target: "India",
+    literal_misstep: "\"Dharti ki sabse customer-centric company\" — this is cold, corporate, and meaningless in Hindi. 'Customer-centric' has no natural Hindi equivalent and reads as English jargon. It sounds like a PowerPoint slide, not a brand promise.",
+    linguistic: {
+      risk: "Medium", score: 58,
+      findings: [
+        { level: "medium", issue: "Corporate Jargon Failure", detail: "'Customer-centric' is MBA language with no emotional resonance in Hindi. Indian consumers respond to warmth, service, and relationship — not corporate efficiency metrics. The word has no Hindi equivalent and forces awkward transliteration.", suggestions: ["Replace 'customer-centric' with 'Aapke liye' (for you)", "Use relationship language: 'Aapka apna' (your very own)", "Avoid all corporate English jargon in Hindi copy — if it needs a hyphen in English, it needs rewriting entirely"] },
+        { level: "low", issue: "Apni Dukaan Insight", detail: "Amazon India's 'Apni Dukaan' (Your Own Shop) campaign was a masterstroke. It replaced a cold corporate claim with the warmth of neighbourhood ownership. A 'dukaan' (shop) is intimate, trusted, and deeply Indian — a tech giant became your local shopkeeper.", suggestions: ["Find the local commercial intimacy metaphor in every market", "Position marketplace as 'yours' not 'the world's biggest'", "Use small business/neighbourhood imagery to counter the 'big tech' coldness"] }
+      ],
+      adaptations: [
+        { label: "Apni Dukaan", text: "अपनी दुकान", note: "Your own shop — transforms a global tech giant into a trusted neighbourhood store" },
+        { label: "Aap Jo Chahein, Hum Laayein", text: "आप जो चाहें, हम लाएं", note: "Whatever you want, we'll bring it — service-first framing that mirrors the Indian domestic help/delivery culture" }
+      ]
+    },
+    cultural: {
+      risk: "Medium", score: 60,
+      findings: [
+        { level: "medium", issue: "Trust Deficit with Online Shopping", detail: "Amazon entered India when online shopping trust was low — cash on delivery was dominant because consumers feared fraud. The cold corporate claim amplified distrust. Cultural warmth and the 'Apni Dukaan' metaphor built the trust that specs couldn't.", suggestions: ["Lead with trust signals in low-trust markets", "Feature return policy and customer service prominently", "Use local celebrities as brand ambassadors to transfer trust"] },
+        { level: "low", issue: "Kirana Store Competition", detail: "Amazon competes with India's 12 million kirana stores (neighbourhood shops). Instead of positioning as opposition, Amazon Smart Commerce and Apni Dukaan positioned them as a tool for kiranas — a co-option strategy that defused cultural resistance.", suggestions: ["Partner with, don't compete against, beloved local institutions", "Show kiranas using Amazon, not replaced by it", "Use 'upgrade' framing, not 'replace' framing for traditional commerce"] }
+      ],
+      adaptations: [
+        { label: "Desh Ki Apni Dukaan", text: "देश की अपनी दुकान", note: "The nation's own shop — adds national pride to local intimacy" },
+        { label: "Har Zaroorat, Ek Jagah", text: "हर ज़रूरत, एक जगह", note: "Every need, one place — practical, reassuring, and mirrors how Indians think about a good market" }
+      ]
+    }
+  },
+  "maggi": {
+    brand: "Maggi", slogan: "Fast to Cook, Good to Eat", source: "Switzerland", target: "India",
+    literal_misstep: "\"Jaldi pakao, achha khao\" — while grammatically correct, it sounds like a utilitarian instruction manual. It carries zero emotional warmth and positions the product as a convenience tool rather than a food loved by mothers and children.",
+    linguistic: {
+      risk: "Low", score: 80,
+      findings: [
+        { level: "low", issue: "Mother Guilt Neutralisation", detail: "Indian mothers face intense pressure to cook nutritious, homemade meals. 'Fast to Cook' implied laziness. Maggi's 'Taste Bhi, Health Bhi' (Taste too, Health too) brilliantly addressed the guilt, repositioning instant noodles as a smart mother's choice.", suggestions: ["Always audit for 'mother guilt' triggers in Indian food marketing", "Add health credentials to any convenience food campaign", "Feature mothers who are empowered, not shortcutting"] },
+        { level: "low", issue: "Two-Minute Positioning", detail: "Maggi's '2-minute noodles' became a cultural shorthand for quick Indian cooking. The number became the brand's most powerful asset — more memorable than any slogan. Indian consumers scheduled meals around 'just 2 minutes away'.", suggestions: ["Find the one quantifiable benefit that can become a cultural shorthand", "Time-based promises work when they're genuinely surprising", "Test if the time claim holds up — Maggi's credibility came from it being true"] }
+      ],
+      adaptations: [
+        { label: "Taste Bhi, Health Bhi", text: "टेस्ट भी, हेल्थ भी", note: "Taste too, health too — addresses mother guilt directly and makes Maggi a smart choice" },
+        { label: "2 Minute Mein Taiyaar", text: "2 मिनट में तैयार", note: "Ready in 2 minutes — the most iconic Indian food timing claim; made the number synonymous with the brand" }
+      ]
+    },
+    cultural: {
+      risk: "Low", score: 83,
+      findings: [
+        { level: "low", issue: "After-School Ritual Ownership", detail: "Maggi successfully colonised the 4 PM after-school hunger moment for Indian children. A generation grew up with Maggi as the automatic answer to after-school hunger — creating lifelong brand loyalty through childhood memory.", suggestions: ["Identify and own one specific consumption moment rather than all occasions", "The after-school moment is powerful because mothers control it", "Use nostalgic childhood imagery for adult campaigns to trigger emotional memory"] },
+        { level: "low", issue: "Crisis Recovery Through Cultural Authenticity", detail: "After the 2015 lead contamination crisis and government ban, Maggi returned with 'Maggi is safe, Maggi is back' and leaned heavily into nostalgia and emotional memory. Recovery was faster because the brand had deep cultural roots — a lesson in cultural equity as crisis insurance.", suggestions: ["Build cultural depth, not just brand awareness, as long-term risk management", "Nostalgia campaigns are powerful recovery tools for trusted brands", "Never underestimate the depth of emotional attachment Indian consumers form with food brands"] }
+      ],
+      adaptations: [
+        { label: "Meri Maggi", text: "मेरी Maggi", note: "My Maggi — personal ownership and nostalgia; used in Maggi's post-ban comeback campaign" },
+        { label: "Ghar Ka Swad", text: "घर का स्वाद", note: "The taste of home — positions an instant product as emotionally homemade" }
+      ]
+    }
+  },
+  "mcdonald": {
+    brand: "McDonald's", slogan: "I'm Lovin' It", source: "United States", target: "India",
+    literal_misstep: "\"Main Isse Pyaar Karta Hoon\" — 'Pyaar' (love) in Hindi is reserved for deep romantic or familial love. Using it for fast food sounds either absurd or uncomfortably intimate. English 'love' is casual; Hindi 'pyaar' carries significant emotional weight.",
+    linguistic: {
+      risk: "Medium", score: 68,
+      findings: [
+        { level: "medium", issue: "Love Word Weight", detail: "In Hindi, 'Pyaar' (love) is heavy — it's what you say to a spouse or mother, not a burger. The casual English 'I'm lovin' it' loses its lightness completely in translation. Indian consumers say 'mujhe bahut pasand hai' (I like it very much) for food appreciation.", suggestions: ["Use 'Bahut Pasand Hai' for casual food affection", "Reserve 'Pyaar' for brand loyalty campaigns, not product taste", "Test emotional weight of love-words across age groups — younger Indians are more casual with 'love'"] },
+        { level: "low", issue: "McAloo Tikki Genius", detail: "McDonald's launched the McAloo Tikki (spiced potato patty burger) in India — a product invented for the market that has no equivalent globally. It demonstrated that localisation isn't just language, it's the product itself. The McAloo Tikki became a cultural icon.", suggestions: ["Localise the product before localising the slogan", "Find the one ingredient or preparation that is universally beloved in the target market", "A localised product generates authentic cultural conversation that no campaign can buy"] }
+      ],
+      adaptations: [
+        { label: "Mujhe Bahut Pasand Hai", text: "मुझे बहुत पसंद है", note: "I like it very much — casual affection appropriate for food, without the emotional weight of 'pyaar'" },
+        { label: "Family Ka Favourite", text: "Family का Favourite", note: "The family's favourite — positions McDonald's as a family outing destination, which drove India's early McDonald's visits" }
+      ]
+    },
+    cultural: {
+      risk: "Low", score: 75,
+      findings: [
+        { level: "low", issue: "Vegetarian Menu Imperative", detail: "McDonald's India introduced a strictly separate vegetarian kitchen — a first globally. This was non-negotiable for the Hindu market where cross-contamination with beef is religiously offensive. The physical separation of veg and non-veg kitchens was as important as any marketing decision.", suggestions: ["Communicate vegetarian kitchen separation explicitly in all Indian markets", "Feature the 'no beef, no pork' commitment prominently in entry campaigns", "Get certification from recognised vegetarian bodies (Jain Food Standards) for highest-trust markets"] },
+        { level: "low", issue: "Family Outing Positioning", detail: "McDonald's in India became synonymous with the family outing — a special occasion for middle-class families, not the everyday cheap meal it is in the US. This premium positioning (despite low prices) was a cultural adaptation of usage occasion, not product.", suggestions: ["Position based on how the category is emotionally used, not how it's used in the home market", "Family togetherness imagery outperforms individual indulgence imagery in collectivist markets", "Price accessibility + occasion prestige is a powerful Indian positioning combination"] }
+      ],
+      adaptations: [
+        { label: "Khushiyon Ka Meal", text: "खुशियों का Meal", note: "A meal of happiness — ties McDonald's to family celebration occasions" },
+        { label: "Har Bite Mein Khushi", text: "हर Bite में खुशी", note: "Happiness in every bite — keeps the English 'bite' which is familiar to young Indian consumers" }
+      ]
+    }
+  },
+  "starbucks": {
+    brand: "Starbucks", slogan: "Our Coffee is Delicious", source: "United States", target: "India",
+    literal_misstep: "\"Hamari Coffee Swadist Hai\" — This is what you'd say about school canteen food. 'Swadist' (tasty) is a generic, low-aspiration word used for everyday food. For a premium brand charging 4x the local chai price, it communicates nothing about luxury, experience, or identity.",
+    linguistic: {
+      risk: "Medium", score: 55,
+      findings: [
+        { level: "medium", issue: "Generic Taste Descriptor", detail: "'Swadist' (delicious) is the word used for street food, school meals, and home cooking. For a brand whose entire value proposition is premium experience and status signalling, it destroys the aspirational positioning entirely.", suggestions: ["Use experience language: 'Ek alag hi duniya' (a world apart)", "Use identity language: 'Aapki apni coffee' (your very own coffee)", "Avoid all generic taste descriptors for premium brands — experience and identity always outperform taste claims"] },
+        { level: "low", issue: "Ownership vs. Service Framing", detail: "Indians value ownership and personalisation. 'Our Coffee' (Hamari Coffee) positions Starbucks as the owner. 'Aapki Apni Coffee' (Your Very Own Coffee) transfers ownership to the customer — a subtle but powerful shift in an aspiration-driven market.", suggestions: ["Always use 'aapka/aapki' (your) framing for premium products", "Customisation messaging ('just the way you like it') resonates strongly", "The 'name on cup' experience translates naturally to Indian personalisation values"] }
+      ],
+      adaptations: [
+        { label: "Aapki Apni Coffee", text: "आपकी अपनी Coffee", note: "Your very own coffee — transfers ownership to the customer; Indians value personal ownership of premium experiences" },
+        { label: "Ek Alag Hi Ehsaas", text: "एक अलग ही एहसास", note: "A feeling like no other — experience-led language appropriate for premium positioning" }
+      ]
+    },
+    cultural: {
+      risk: "Medium", score: 62,
+      findings: [
+        { level: "medium", issue: "Chai Culture Competition", detail: "Starbucks competes with India's deepest food ritual — chai. Chai is not just a drink; it's a social institution, a comfort object, and a hospitality symbol. Any coffee brand entering India must position around chai's absence occasions, not in direct competition with it.", suggestions: ["Position coffee as the 'work mode' drink vs. chai's 'rest mode'", "Introduce chai-inspired drinks (masala chai latte) as bridge products", "Never show coffee replacing chai in social or family settings — only in individual, aspirational contexts"] },
+        { level: "medium", issue: "Third Place Concept Gap", detail: "Starbucks' global positioning as a 'third place' (not home, not work) resonates in individualistic Western cultures. In India, the third place is already occupied by the mohalla (neighbourhood), chai tapri, or family gathering. Starbucks had to reposition as a work-aspirational and date space instead.", suggestions: ["Position Starbucks as a productivity space for young professionals", "Lean into the 'laptop culture' and co-working aesthetic", "For couples, position as modern dating space — fills a genuine gap in Indian social geography"] }
+      ],
+      adaptations: [
+        { label: "Kaam Ka Saathi", text: "काम का साथी", note: "Your work companion — positions Starbucks as the productivity drink for India's aspirational young professional" },
+        { label: "Apna Corner, Apni Coffee", text: "अपना Corner, अपनी Coffee", note: "Your corner, your coffee — the personal space narrative that resonates with young Indians seeking individual identity" }
+      ]
+    }
+  },
+  "airbnb": {
+    brand: "Airbnb", slogan: "Live Anywhere", source: "United States", target: "India",
+    literal_misstep: "\"Kahin Bhi Raho\" (Live anywhere) sounds nomadic, rootless, and slightly desperate in Hindi. In Indian culture, not having a fixed home is associated with poverty or social instability — not freedom. The aspirational framing completely inverts.",
+    linguistic: {
+      risk: "High", score: 32,
+      findings: [
+        { level: "high", issue: "Rootlessness = Poverty", detail: "In Indian culture, having a permanent home (Ghar) is one of the most fundamental markers of stability, success, and social standing. 'Living anywhere' implies you don't have a real home — which is a social stigma, not a lifestyle aspiration. This is the opposite of the intended freedom messaging.", suggestions: ["Replace 'live anywhere' with 'feel at home everywhere'", "Use 'Ghar se door, ek ghar' (away from home, a home)", "Lead with safety and home-like comfort, not nomadic freedom"] },
+        { level: "medium", issue: "Safety Anxiety for Solo Travellers", detail: "Indian women travellers face real safety concerns. 'Live anywhere' triggers anxiety about unknown hosts and unverified accommodations. The freedom narrative requires a safety foundation that Airbnb's global campaigns don't address.", suggestions: ["Lead with verified host credentials in Indian campaigns", "Feature women travellers with visible safety features", "Use 'Super Host' and rating systems as headline claims, not fine print"] }
+      ],
+      adaptations: [
+        { label: "Ghar se Door, Ek Ghar", text: "घर से दूर, एक घर", note: "Away from home, a home — the most powerful India adaptation; addresses the core cultural need for home-ness while travelling" },
+        { label: "Apna Ghar, Har Jagah", text: "अपना घर, हर जगह", note: "Your home, everywhere — ownership framing that makes every stay feel like yours" }
+      ]
+    },
+    cultural: {
+      risk: "High", score: 38,
+      findings: [
+        { level: "high", issue: "Stranger Danger in the Home", detail: "The concept of staying in a stranger's home cuts against deep Indian cultural norms around home sanctity. The home is private, often religiously significant (puja rooms, sacred spaces), and not for outsiders. Airbnb had to heavily emphasise 'belonging' and host vetting to overcome this.", suggestions: ["Feature host-guest relationship warmth, not anonymous transaction", "Show hosts welcoming guests as 'atithi devo bhava' (guest is god)", "Emphasise local host knowledge as a feature — 'experience like a local'"] },
+        { level: "medium", issue: "Joint Family Travel Dynamics", detail: "Indian travel is predominantly family-group travel — often 3 generations, 8+ people. Airbnb's platform (initially built for solo/couple travellers) had to adapt to large group accommodation needs. 'Live anywhere' doesn't speak to the joint family travel reality.", suggestions: ["Feature large home rentals prominently in Indian market", "Show multi-generational family stays", "Price messaging should reference per-family cost, not per-person cost"] }
+      ],
+      adaptations: [
+        { label: "Atithi Devo Bhava", text: "अतिथि देवो भव", note: "Guest is god — co-opts India's own hospitality philosophy to make Airbnb feel culturally native" },
+        { label: "Parivaar ke Saath, Ghar Jaisa", text: "परिवार के साथ, घर जैसा", note: "With family, like home — speaks to the dominant Indian travel mode of joint family trips" }
+      ]
+    }
+  },
+  "zomato": {
+    brand: "Zomato", slogan: "Food will arrive fast", source: "India", target: "India",
+    literal_misstep: "\"Khana jaldi pahunchega\" reads like a customer service reassurance, not a brand promise. It's what a call centre agent says when you complain — not what makes you choose a platform. It's functional, cold, and devoid of the emotional warmth that Indian food culture demands.",
+    linguistic: {
+      risk: "Low", score: 78,
+      findings: [
+        { level: "low", issue: "Speed vs. Emotion Trade-off", detail: "Speed is table stakes for food delivery — it's expected, not differentiating. Indian food culture is deeply emotional ('Ma ke hath ka khana' — mother's hand-cooked food is the gold standard). A speed claim ignores the real emotional job to be done: making delivery feel warm and personal.", suggestions: ["Lead with emotional connection, follow with speed reassurance", "Use 'Ma ke hath ka swad, jaldi' to combine emotional and functional benefits", "Feature the human story of the meal — who made it, what occasion is it for"] },
+        { level: "low", issue: "Hyper-Local Copy Success", detail: "Zomato's most successful Indian campaigns used deeply local references — festival foods, regional dishes, city-specific food culture. Their Holi, Diwali, and IPL campaign copy was hyper-contextual and generated massive organic sharing.", suggestions: ["Create city-specific campaigns, not pan-India generic ones", "Use trending cultural moments (IPL, elections, festivals) for real-time campaign copy", "Invest in regional language copy — Zomato's Tamil, Bengali, and Marathi campaigns outperformed Hindi in respective markets"] }
+      ],
+      adaptations: [
+        { label: "Ma ke Hath ka Swad, Jaldi", text: "माँ के हाथ का स्वाद, जल्दी", note: "Mom's hand-taste, fast — combines India's deepest food emotion with the functional delivery promise" },
+        { label: "Bhook Lagi? Zomato Hai Na", text: "भूख लगी? Zomato है ना", note: "Hungry? Zomato is there — casual, warm, reassuring; mirrors how Indians talk about reliable friends" }
+      ]
+    },
+    cultural: {
+      risk: "Low", score: 80,
+      findings: [
+        { level: "low", issue: "Occasion-Based Ordering", detail: "Indians don't order food delivery out of laziness — they order for specific occasions: late-night cravings, post-match celebrations, festival prep, office parties. Zomato's most effective campaigns were tied to these specific cultural occasions rather than generic hunger.", suggestions: ["Build a calendar of Indian cultural occasions and create specific campaigns for each", "The IPL + Zomato association drove massive order spikes — sport-food linking is powerful", "Target the 'Sunday lunch laziness' moment — the most universal Indian food delivery trigger"] },
+        { level: "low", issue: "Regional Cuisine Pride", detail: "India's food culture is intensely regional. A Bengali will be offended if their Hilsa fish curry is presented as generic 'Indian food.' Zomato's 'Local Legends' programme celebrated regional restaurant owners, making delivery a cultural pride act, not just convenience.", suggestions: ["Feature regional cuisine with the same pride as international cuisine", "Name regional dishes correctly and explain them — don't simplify for pan-India audiences", "Partner with regional food influencers, not just pan-India food celebrities"] }
+      ],
+      adaptations: [
+        { label: "Bhook Mitao, Dil Khush Karo", text: "भूख मिटाओ, दिल खुश करो", note: "Satisfy hunger, make the heart happy — combines functional and emotional satisfaction" },
+        { label: "Aapke Shehar Ka Swad", text: "आपके शहर का स्वाद", note: "The taste of your city — hyper-local pride positioning that celebrates regional food culture" }
+      ]
+    }
+  },
+  "pillsbury": {
+    brand: "Pillsbury", slogan: "Freshness You Can See", source: "United States", target: "India",
+    literal_misstep: "\"Taazgi jo dikhti hai\" — Indians judge roti quality by touch, smell, and softness — not appearance. A dough that 'looks fresh' means nothing to an Indian mother. She wants dough that 'feels soft' and makes 'phuliyan rotis' (puffed rotis). Visual freshness is a Western quality cue, not an Indian one.",
+    linguistic: {
+      risk: "Medium", score: 60,
+      findings: [
+        { level: "medium", issue: "Wrong Sensory Channel", detail: "Freshness in Western food culture is visual — bright colours, visible moisture, clear packaging. Freshness in Indian atta (flour) culture is tactile and olfactory — how the dough feels under your hands, how the roti smells, whether it puffs properly on the tawa. 'Freshness You Can See' addresses the wrong sense entirely.", suggestions: ["Use tactile language: 'Naram dough, phuliyan rotis' (soft dough, puffed rotis)", "Feature the hand-touch of dough in all visual communications", "Sound design in video ads — the sound of a puffing roti is more persuasive than any visual freshness cue"] },
+        { level: "medium", issue: "Chakki Fresh Atta Benchmark", detail: "Indian mothers benchmark atta quality against chakki-fresh (stone-ground fresh) flour from their local chakki. Pillsbury had to position against this 'freshly ground' benchmark — the gold standard that no packaged flour can visually replicate.", suggestions: ["Acknowledge the chakki benchmark, don't ignore it", "Use 'chakki jaise' (like chakki-ground) language to connect to the benchmark", "Feature the milling process visually to counter the 'packaged = inferior' perception"] }
+      ],
+      adaptations: [
+        { label: "Naram Roti, Khush Parivar", text: "नरम रोटी, खुश परिवार", note: "Soft roti, happy family — addresses the real Indian quality benchmark (softness/naram) and connects it to family happiness" },
+        { label: "Chakki Jaisi Taazgi", text: "चक्की जैसी ताज़गी", note: "Freshness like chakki-ground — directly addresses the gold standard that Indian mothers benchmark against" }
+      ]
+    },
+    cultural: {
+      risk: "Medium", score: 65,
+      findings: [
+        { level: "medium", issue: "Mother's Roti Identity", detail: "An Indian mother's roti-making ability is tied to her identity and love for her family. Packaged atta was initially seen as a shortcut that undermined this identity. Pillsbury had to reframe from 'convenience product' to 'quality ingredient that helps her make better rotis' — a crucial cultural reframe.", suggestions: ["Never position packaged atta as a shortcut — position as a quality upgrade", "Show mothers being praised for their rotis, not relieved from making them", "The endorsement of a mother-in-law for the atta quality is the highest trust signal in Indian kitchens"] },
+        { level: "low", issue: "Nutrition Claim Opportunity", detail: "Indian mothers are deeply concerned with the nutritional value of what they feed their families — particularly the iron, calcium, and fibre content of atta. Pillsbury's 'Chakki Fresh' atta with added nutrients tapped into this anxiety with a functional benefit that visual freshness never could.", suggestions: ["Lead with nutritional credentials for health-conscious urban mothers", "Use the 'Taste Bhi, Health Bhi' framework — taste and health must coexist", "Feature specific nutrients relevant to Indian dietary concerns (iron for anaemia, calcium for bones)"] }
+      ],
+      adaptations: [
+        { label: "Maa Ke Haath Ki Meethi Roti", text: "माँ के हाथ की मीठी रोटी", note: "Mother's sweet roti — connects the product to the deepest Indian food emotion: mother's cooking" },
+        { label: "Har Roti Mein Pyaar", text: "हर रोटी में प्यार", note: "Love in every roti — positions Pillsbury as enabling the emotional act of nourishing one's family" }
+      ]
+    }
+  }
+};
+
+function findAudit(brand) {
+  const key = brand.toLowerCase().replace(/[^a-z]/g, '');
+  // exact match
+  if (DATASET[key]) return DATASET[key];
+  // partial match
+  for (const k of Object.keys(DATASET)) {
+    if (key.includes(k) || k.includes(key)) return DATASET[k];
+  }
+  return null;
+}
+
+function runAudit() {
+  const brand  = document.getElementById('f-brand').value.trim();
+  const slogan = document.getElementById('f-slogan').value.trim();
+
+  if (!brand || !slogan) { alert('Please enter a brand name and slogan.'); return; }
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  document.getElementById('btn-label').textContent = 'Auditing...';
+  document.getElementById('ring').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('skeleton').style.display = 'block';
+
+  // Simulate a brief loading moment for effect
+  setTimeout(() => {
+    const audit = findAudit(brand);
+
+    document.getElementById('skeleton').style.display = 'none';
+    btn.disabled = false;
+    document.getElementById('btn-label').textContent = 'Run Audit';
+    document.getElementById('ring').style.display = 'none';
+
+    if (audit) {
+      // Override brand/slogan/source/target with what the user typed if they match
+      const result = { ...audit };
+      renderResults(result);
+    } else {
+      document.getElementById('empty-state').style.display = 'flex';
+      document.getElementById('empty-state').innerHTML = `
+        <div class="empty-headline" style="font-size:30px;">No audit found for <em>${brand}.</em></div>
+        <div class="empty-rule"></div>
+        <div class="empty-desc">Try one of our curated brands: Coca-Cola, Cadbury, Nike, Pepsi, KFC, Ford, Amazon, Maggi, McDonald's, Starbucks, Airbnb, Zomato, or Pillsbury.</div>`;
+    }
+  }, 1800);
+}
+
+const riskClass  = r => ({ high:'badge-high', medium:'badge-medium', low:'badge-low' })[r.toLowerCase()];
+const scoreClass = r => ({ high:'s-high', medium:'s-medium', low:'s-low' })[r.toLowerCase()];
+const barClass   = l => ({ high:'bar-high', medium:'bar-medium', low:'bar-low' })[l];
+const cap        = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+function overallRisk(a) {
+  const lvl = ['low','medium','high'];
+  return lvl[Math.max(lvl.indexOf(a.linguistic.risk.toLowerCase()), lvl.indexOf(a.cultural.risk.toLowerCase()))];
+}
+
+function findingsHtml(findings) {
+  return findings.map(f => `
+    <div class="finding">
+      <div class="finding-bar ${barClass(f.level)}"></div>
+      <div style="flex:1">
+        <div class="finding-issue">${f.issue}</div>
+        <div class="finding-detail">${f.detail}</div>
+        <div class="sug-box">
+          <div class="sug-title">Suggested Actions</div>
+          ${f.suggestions.map((s,i) => `<div class="sug-item"><span class="sug-n">${i+1}.</span><span>${s}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function adaptHtml(adaptations) {
+  if (!adaptations?.length) return '';
+  return `<div class="adapt-box">
+    <div class="adapt-label">Suggested Adaptations</div>
+    <div class="adapt-grid">
+      ${adaptations.map(a => `
+        <div class="adapt-opt">
+          <div class="adapt-opt-label">${a.label}</div>
+          <div class="adapt-opt-text">${a.text}</div>
+          <div class="adapt-opt-note">${a.note}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function blockHtml(id, icon, name, sub, data, fu) {
+  const bid = `body-${id}`;
+  return `
+    <div class="audit-block fu ${fu}">
+      <div class="block-header" onclick="toggleBlock('${bid}')">
+        <div class="block-left">
+          <div class="block-icon">${icon}</div>
+          <div>
+            <div class="block-name">${name}</div>
+            <div class="block-sub">${sub}</div>
+          </div>
+        </div>
+        <div class="block-right">
+          <span class="risk-badge ${riskClass(data.risk)}">${data.risk} Risk</span>
+          <span class="block-chevron open" id="chev-${bid}">▾</span>
+        </div>
+      </div>
+      <div class="block-body open" id="${bid}">
+        ${findingsHtml(data.findings)}
+        ${adaptHtml(data.adaptations)}
+      </div>
+    </div>`;
+}
+
+function toggleBlock(bid) {
+  const body = document.getElementById(bid);
+  const chev = document.getElementById('chev-' + bid);
+  body.classList.toggle('open');
+  chev.classList.toggle('open', body.classList.contains('open'));
+}
+
+function renderResults(a) {
+  const overall = overallRisk(a);
+  const avg = Math.round((a.linguistic.score + a.cultural.score) / 2);
+  const now = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+
+  document.getElementById('results').innerHTML = `
+    <div class="fu fu1">
+      <div class="result-rule-top"></div>
+      <div class="result-dateline">${a.brand} - Cultural Audit Report - ${now}</div>
+      <div class="result-slogan">"${a.slogan}"</div>
+      <div class="result-rule-mid"></div>
+      <div class="result-route">
+        <span class="route-from">${a.source}</span>
+        <span class="route-arrow">→</span>
+        <span class="route-to">${a.target}</span>
+        <span class="risk-badge ${riskClass(overall)}">${cap(overall)} Overall Risk</span>
+      </div>
+    </div>
+
+    ${a.literal_misstep ? `
+    <div class="misstep fu fu2">
+      <div class="misstep-label">What Your Slogan Actually Says</div>
+      <div class="misstep-text">${a.literal_misstep}</div>
+      <div class="misstep-sub">Direct translation result in the target market</div>
+    </div>` : ''}
+
+    <div class="score-strip fu fu2">
+      <div class="score-card ${scoreClass(overall)}">
+        <div class="score-label">Overall Safety</div>
+        <div class="score-number">${avg}</div>
+        <div class="score-risk">${cap(overall)} Risk</div>
+      </div>
+      <div class="score-card ${scoreClass(a.linguistic.risk)}">
+        <div class="score-label">Linguistic Safety</div>
+        <div class="score-number">${a.linguistic.score}</div>
+        <div class="score-risk">${a.linguistic.risk} Risk</div>
+      </div>
+      <div class="score-card ${scoreClass(a.cultural.risk)}">
+        <div class="score-label">Cultural Safety</div>
+        <div class="score-number">${a.cultural.score}</div>
+        <div class="score-risk">${a.cultural.risk} Risk</div>
+      </div>
+    </div>
+
+    ${blockHtml('ling', '🔤', 'Linguistic Audit', 'Phonetics - Semantics - Script - Direct Translation', a.linguistic, 'fu3')}
+    ${blockHtml('cult', '🌐', 'Cultural Audit', 'Emotion - Symbolism - Political Context - History', a.cultural, 'fu4')}
+
+    <div class="disclaimer-block fu fu5">
+      <p><strong>Audit Philosophy -</strong> LingoNexus identifies risk across linguistic, emotional, cultural, and political dimensions. Every finding is grounded in documented real-world knowledge. This report flags and informs - all final decisions require human cultural expertise and native speaker review before deployment.</p>
+      <div class="made-by">Designed and built by <span>Budhaditya</span> - LingoNexus Cultural Intelligence Engine</div>
+    </div>`;
+
+  const el = document.getElementById('results');
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
